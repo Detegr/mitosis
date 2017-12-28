@@ -53,6 +53,11 @@ $(abspath $(NRF_SDK_PATH)/components/libraries/uart/app_uart_fifo.c) \
 $(abspath $(NRF_SDK_PATH)/components/drivers_nrf/delay/nrf_delay.c) \
 $(abspath $(NRF_SDK_PATH)/components/drivers_nrf/common/nrf_drv_common.c) \
 $(abspath $(NRF_SDK_PATH)/components/drivers_nrf/uart/nrf_drv_uart.c) \
+$(abspath $(NRF_SDK_PATH)/components/properitary_rf/gzll/nrf_gzp.c) \
+$(abspath $(NRF_SDK_PATH)/components/properitary_rf/gzll/nrf_gzp_host.c) \
+$(abspath $(NRF_SDK_PATH)/components/properitary_rf/gzll/nrf_gzp_host_nrf51.c) \
+$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/hal/nrf_ecb.c) \
+$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/hal/nrf_nvmc.c)
 
 #assembly files common to all targets
 ASM_SOURCE_FILES  = $(abspath $(NRF_SDK_PATH)/components/toolchain/gcc/gcc_startup_nrf51.s)
@@ -63,6 +68,7 @@ LIBS  = $(abspath $(NRF_SDK_PATH)/components/properitary_rf/gzll/gcc/gzll_gcc.a)
 
 #includes common to all targets
 INC_PATHS += -I$(abspath $(CURDIR)/../../config)
+INC_PATHS += -I$(abspath $(CURDIR)/../../../config)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/nrf_soc_nosd)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/device)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/libraries/uart)

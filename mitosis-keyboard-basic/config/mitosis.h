@@ -132,8 +132,6 @@
 
 #ifdef COMPILE_LEFT
 
-#define PIPE_NUMBER 0
-
 #define LED_PIN L_LED
 
 #define S01 L_S01
@@ -169,7 +167,7 @@
 
 #ifdef COMPILE_RIGHT
 
-#define PIPE_NUMBER 1
+#define LED_PIN R_LED
 
 #define S01 R_S01
 #define S02 R_S02

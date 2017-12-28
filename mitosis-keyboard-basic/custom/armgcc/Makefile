@@ -48,6 +48,10 @@ $(abspath $(NRF_SDK_PATH)/components/drivers_nrf/clock/nrf_drv_clock.c) \
 $(abspath $(NRF_SDK_PATH)/components/libraries/util/app_util_platform.c) \
 $(abspath $(NRF_SDK_PATH)/components/drivers_nrf/common/nrf_drv_common.c) \
 $(abspath $(NRF_SDK_PATH)/components/drivers_nrf/rtc/nrf_drv_rtc.c) \
+$(abspath $(NRF_SDK_PATH)/components/properitary_rf/gzll/nrf_gzp.c) \
+$(abspath $(NRF_SDK_PATH)/components/properitary_rf/gzll/nrf_gzp_device.c) \
+$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/hal/nrf_ecb.c) \
+$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/hal/nrf_nvmc.c)
 
 
 #assembly files common to all targets
@@ -58,6 +62,7 @@ LIBS  = $(abspath $(NRF_SDK_PATH)/components/properitary_rf/gzll/gcc/gzll_gcc.a)
 
 #includes common to all targets
 INC_PATHS  = -I$(abspath $(CURDIR)/../../config)
+INC_PATHS += -I$(abspath $(CURDIR)/../../../config)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/device)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/toolchain/CMSIS/Include)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/properitary_rf/gzll)
@@ -69,10 +74,10 @@ INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/toolchain)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/nrf_soc_nosd)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/common)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/clock)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/hal)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/libraries/util)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/config)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/rtc)
-
 
 OBJECT_DIRECTORY = $(CURDIR)/_build
 LISTING_DIRECTORY = $(OBJECT_DIRECTORY)
