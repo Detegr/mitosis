@@ -39,18 +39,23 @@ static volatile bool debouncing = false;
 // Debug helper variables
 static volatile bool init_ok, enable_ok, push_ok, pop_ok, tx_success, dyn_key_ready = false;
 
+enum gzp_pairing_status {
+    PAIRING_DATABASE_EMPTY = -2,
+    NO_HOST_ID = -1,
+};
+
 // Pair this keyboard half with a host
 static void pair()
 {
     switch (gzp_get_pairing_status())
     {
-    case -2:
+    case PAIRING_DATABASE_EMPTY:
         if (!gzp_address_req_send())
         {
             break;
         }
         // Intentional fall-through
-    case -1:
+    case NO_HOST_ID:
         if (gzp_id_req_send() != GZP_ID_RESP_GRANTED)
         {
             break;
