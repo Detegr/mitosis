@@ -13,7 +13,7 @@
 
 #define MAX_TEST_DATA_BYTES     (15U)                /**< max number of test bytes to be used for tx and rx. */
 #define UART_TX_BUF_SIZE 256                         /**< UART TX buffer size. */
-#define UART_RX_BUF_SIZE 1                           /**< UART RX buffer size. */
+#define UART_RX_BUF_SIZE 1                         /**< UART RX buffer size. */
 
 
 #define RX_PIN_NUMBER  25
@@ -52,7 +52,7 @@ static uint8_t data_buffer[10];
 
 // Debug helper variables
 extern nrf_gzll_error_code_t nrf_gzll_error_code;   ///< Error code
-static bool init_ok, enable_ok, push_ok, pop_ok, packet_received_left, packet_received_right;
+static bool init_ok, enable_ok, push_ok, pop_ok, packet_received_left, packet_received_right, uart_initialized;
 uint32_t left_active = 0;
 uint32_t right_active = 0;
 uint8_t c;
@@ -65,13 +65,16 @@ uint32_t right_decrypt_fail = 0;
 
 void uart_error_handle(app_uart_evt_t * p_event)
 {
-    if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
+    if (uart_initialized)
     {
-        APP_ERROR_HANDLER(p_event->data.error_communication);
-    }
-    else if (p_event->evt_type == APP_UART_FIFO_ERROR)
-    {
-        APP_ERROR_HANDLER(p_event->data.error_code);
+        if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
+        {
+            APP_ERROR_HANDLER(p_event->data.error_communication);
+        }
+        else if (p_event->evt_type == APP_UART_FIFO_ERROR)
+        {
+            APP_ERROR_HANDLER(p_event->data.error_code);
+        }
     }
 }
 
@@ -98,6 +101,8 @@ int main(void)
                          err_code);
 
     APP_ERROR_CHECK(err_code);
+
+    uart_initialized = true;
 
     // Initialize Gazell
     nrf_gzll_init(NRF_GZLL_MODE_HOST);
