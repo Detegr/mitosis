@@ -35,9 +35,7 @@ static uint8_t ack_payload[NRF_GZLL_CONST_MAX_PAYLOAD_LENGTH]; ///< Placeholder 
 static uint32_t keys, keys_snapshot;
 static uint32_t debounce_ticks, activity_ticks;
 static volatile bool debouncing = false;
-
-// Debug helper variables
-static volatile bool init_ok, enable_ok, push_ok, pop_ok, tx_success, dyn_key_ready = false;
+static volatile bool dyn_key_ready = false;
 
 enum gzp_pairing_status {
     PAIRING_DATABASE_EMPTY = -2,
@@ -121,7 +119,7 @@ static void send_data(void)
                       ((keys & 1<<S05) ? 1:0) << 3 | \
                       ((keys & 1<<S06) ? 1:0) << 2 | \
                       ((keys & 1<<S07) ? 1:0) << 1 | \
-                      ((keys & 1<<S08) ? 1:0) << 0;
+                      ((keys & 1<<S08) ? 1:0);
 
     data_payload[2] = ((keys & 1<<S09) ? 1:0) << 7 | \
                       ((keys & 1<<S10) ? 1:0) << 6 | \
@@ -130,7 +128,7 @@ static void send_data(void)
                       ((keys & 1<<S13) ? 1:0) << 3 | \
                       ((keys & 1<<S14) ? 1:0) << 2 | \
                       ((keys & 1<<S15) ? 1:0) << 1 | \
-                      ((keys & 1<<S16) ? 1:0) << 0;
+                      ((keys & 1<<S16) ? 1:0);
 
     data_payload[3] = ((keys & 1<<S17) ? 1:0) << 7 | \
                       ((keys & 1<<S18) ? 1:0) << 6 | \
@@ -138,11 +136,11 @@ static void send_data(void)
                       ((keys & 1<<S20) ? 1:0) << 4 | \
                       ((keys & 1<<S21) ? 1:0) << 3 | \
                       ((keys & 1<<S22) ? 1:0) << 2 | \
-                      ((keys & 1<<S23) ? 1:0) << 1 | \
-                      0 << 0;
+                      ((keys & 1<<S23) ? 1:0) << 1;
 
     dyn_key_ready = gzp_crypt_data_send(data_payload, TX_PAYLOAD_LENGTH);
-    if (!dyn_key_ready)
+    bool pairing_key_combo_pressed = (keys & (1<<S22)) && (keys & (1<<S23));
+    if(!dyn_key_ready && pairing_key_combo_pressed)
     {
         pair();
     }
