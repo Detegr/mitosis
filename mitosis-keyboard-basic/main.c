@@ -34,8 +34,9 @@ static uint8_t ack_payload[NRF_GZLL_CONST_MAX_PAYLOAD_LENGTH]; ///< Placeholder 
 // Key buffers
 static uint32_t keys, keys_snapshot;
 static uint32_t debounce_ticks, activity_ticks;
-static volatile bool debouncing = false;
-static volatile bool dyn_key_ready = false;
+static bool host_id_ok = false;
+static bool debouncing = false;
+static bool dyn_key_ready = false;
 
 enum gzp_pairing_status {
     PAIRING_DATABASE_EMPTY = -2,
@@ -58,6 +59,7 @@ static void pair()
         {
             break;
         }
+        host_id_ok = true;
         // Intentional fall-through
     default:
         if (!dyn_key_ready)
@@ -106,6 +108,16 @@ static uint32_t read_keys(void)
 // Assemble packet and send to receiver
 static void send_data(void)
 {
+    bool pairing_key_combo_pressed = (keys & (1<<S22)) && (keys & (1<<S23));
+    if(!host_id_ok)
+    {
+        if(pairing_key_combo_pressed)
+        {
+            pair();
+        }
+        return;
+    }
+
 #ifdef COMPILE_LEFT
     data_payload[0] = true;
 #else
@@ -139,7 +151,6 @@ static void send_data(void)
                       ((keys & 1<<S23) ? 1:0) << 1;
 
     dyn_key_ready = gzp_crypt_data_send(data_payload, TX_PAYLOAD_LENGTH);
-    bool pairing_key_combo_pressed = (keys & (1<<S22)) && (keys & (1<<S23));
     if(!dyn_key_ready && pairing_key_combo_pressed)
     {
         pair();
