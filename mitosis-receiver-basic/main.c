@@ -177,16 +177,7 @@ int main(void)
                              ((data_payload_right[2] & 1<<1) ? 1:0) << 3;
         }
 
-        int has_data = 0;
-        for(int i=0; i<10; ++i) {
-            if(data_buffer[i] != 0) {
-                has_data = 1;
-                break;
-            }
-        }
-        // checking for a poll request from QMK
-        if(has_data)
-        //if (app_uart_get(&c) == NRF_SUCCESS && c == 's')
+        if (app_uart_get(&c) == NRF_SUCCESS && c == 's')
         {
             // sending data to QMK, and an end byte
             nrf_drv_uart_tx(data_buffer,10);
