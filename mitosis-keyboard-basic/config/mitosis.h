@@ -80,7 +80,7 @@
 #define R_S02 0
 #define R_S03 5
 #define R_S04 10
-#define R_S05 15
+#define R_S05 17
 #define R_S06 23
 #define R_S07 1
 #define R_S08 4
