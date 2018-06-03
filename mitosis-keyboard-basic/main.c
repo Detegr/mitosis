@@ -1,6 +1,6 @@
 
-#define COMPILE_RIGHT
-//#define COMPILE_LEFT
+//#define COMPILE_RIGHT
+#define COMPILE_LEFT
 
 #include "mitosis.h"
 #include "nrf_drv_config.h"
@@ -20,7 +20,7 @@ const nrf_drv_rtc_t rtc_deb = NRF_DRV_RTC_INSTANCE(1); /**< Declaring an instanc
 
 
 // Define payload length
-#define TX_PAYLOAD_LENGTH 3 ///< 3 byte payload length when transmitting
+#define TX_PAYLOAD_LENGTH 4 ///< 4 byte payload length when transmitting
 
 // Data and acknowledgement payloads
 static uint8_t data_payload[TX_PAYLOAD_LENGTH];                ///< Payload to send to Host. 
@@ -64,6 +64,9 @@ static void gpio_config(void)
     nrf_gpio_cfg_sense_input(S21, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
     nrf_gpio_cfg_sense_input(S22, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
     nrf_gpio_cfg_sense_input(S23, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
+    nrf_gpio_cfg_sense_input(S24, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
+    nrf_gpio_cfg_sense_input(S25, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
+    nrf_gpio_cfg_sense_input(S26, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
 }
 
 // Return the key states, masked with valid key pins
@@ -82,7 +85,7 @@ static void send_data(void)
                       ((keys & 1<<S05) ? 1:0) << 3 | \
                       ((keys & 1<<S06) ? 1:0) << 2 | \
                       ((keys & 1<<S07) ? 1:0) << 1 | \
-                      ((keys & 1<<S08) ? 1:0) << 0;
+                      ((keys & 1<<S08) ? 1:0);
 
     data_payload[1] = ((keys & 1<<S09) ? 1:0) << 7 | \
                       ((keys & 1<<S10) ? 1:0) << 6 | \
@@ -91,7 +94,7 @@ static void send_data(void)
                       ((keys & 1<<S13) ? 1:0) << 3 | \
                       ((keys & 1<<S14) ? 1:0) << 2 | \
                       ((keys & 1<<S15) ? 1:0) << 1 | \
-                      ((keys & 1<<S16) ? 1:0) << 0;
+                      ((keys & 1<<S16) ? 1:0);
 
     data_payload[2] = ((keys & 1<<S17) ? 1:0) << 7 | \
                       ((keys & 1<<S18) ? 1:0) << 6 | \
@@ -99,8 +102,11 @@ static void send_data(void)
                       ((keys & 1<<S20) ? 1:0) << 4 | \
                       ((keys & 1<<S21) ? 1:0) << 3 | \
                       ((keys & 1<<S22) ? 1:0) << 2 | \
-                      ((keys & 1<<S23) ? 1:0) << 1 | \
-                      0 << 0;
+                      ((keys & 1<<S23) ? 1:0) << 1;
+
+    data_payload[3] = ((keys & 1<<S24) ? 1:0) | \
+                      ((keys & 1<<S25) ? 1:0) << 1 | \
+                      ((keys & 1<<S26) ? 1:0) << 2;
 
     nrf_gzll_add_packet_to_tx_fifo(PIPE_NUMBER, data_payload, TX_PAYLOAD_LENGTH);
 }

@@ -22,7 +22,7 @@
 
 
 // Define payload length
-#define TX_PAYLOAD_LENGTH 3 ///< 3 byte payload length
+#define TX_PAYLOAD_LENGTH 4 ///< 4 byte payload length
 
 // ticks for inactive keyboard
 #define INACTIVE 100000
@@ -115,30 +115,33 @@ int main(void)
         {
             packet_received_left = false;
 
-            data_buffer[0] = ((data_payload_left[0] & 1<<3) ? 1:0) << 0 |
-                             ((data_payload_left[0] & 1<<4) ? 1:0) << 1 |
-                             ((data_payload_left[0] & 1<<5) ? 1:0) << 2 |
+            data_buffer[0] = ((data_payload_left[0] & 1<<5) ? 1:0) << 2 |
                              ((data_payload_left[0] & 1<<6) ? 1:0) << 3 |
-                             ((data_payload_left[0] & 1<<7) ? 1:0) << 4;
+                             ((data_payload_left[0] & 1<<7) ? 1:0) << 4 |
+                             ((data_payload_left[3] & 1   ) ? 1:0) << 5;
 
             data_buffer[2] = ((data_payload_left[1] & 1<<6) ? 1:0) << 0 |
-                             ((data_payload_left[1] & 1<<7) ? 1:0) << 1 |
                              ((data_payload_left[0] & 1<<0) ? 1:0) << 2 |
                              ((data_payload_left[0] & 1<<1) ? 1:0) << 3 |
-                             ((data_payload_left[0] & 1<<2) ? 1:0) << 4;
+                             ((data_payload_left[0] & 1<<2) ? 1:0) << 4 |
+                             ((data_payload_left[0] & 1<<3) ? 1:0) << 5;
 
             data_buffer[4] = ((data_payload_left[1] & 1<<1) ? 1:0) << 0 |
                              ((data_payload_left[1] & 1<<2) ? 1:0) << 1 |
                              ((data_payload_left[1] & 1<<3) ? 1:0) << 2 |
                              ((data_payload_left[1] & 1<<4) ? 1:0) << 3 |
-                             ((data_payload_left[1] & 1<<5) ? 1:0) << 4;
+                             ((data_payload_left[1] & 1<<5) ? 1:0) << 4 |
+                             ((data_payload_left[3] & 1<<2) ? 1:0) << 5;
 
             data_buffer[6] = ((data_payload_left[2] & 1<<5) ? 1:0) << 1 |
                              ((data_payload_left[2] & 1<<6) ? 1:0) << 2 |
-                             ((data_payload_left[2] & 1<<7) ? 1:0) << 3 |
-                             ((data_payload_left[1] & 1<<0) ? 1:0) << 4;
+                             ((data_payload_left[2] & 1<<7) ? 1:0) << 0 |
+                             ((data_payload_left[1] & 1<<7) ? 1:0) << 3 |
+                             ((data_payload_left[1] & 1<<0) ? 1:0) << 4 |
+                             ((data_payload_left[3] & 1<<1) ? 1:0) << 5;
 
-            data_buffer[8] = ((data_payload_left[2] & 1<<1) ? 1:0) << 1 |
+            data_buffer[8] = ((data_payload_left[0] & 1<<4) ? 1:0) |
+                             ((data_payload_left[2] & 1<<1) ? 1:0) << 1 |
                              ((data_payload_left[2] & 1<<2) ? 1:0) << 2 |
                              ((data_payload_left[2] & 1<<3) ? 1:0) << 3 |
                              ((data_payload_left[2] & 1<<4) ? 1:0) << 4;
