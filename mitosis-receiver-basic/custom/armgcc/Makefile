@@ -97,6 +97,15 @@ CFLAGS += -mfloat-abi=soft
 # keep every function in separate section. This will allow linker to dump unused functions
 CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
 CFLAGS += -fno-builtin --short-enums 
+
+ifeq ($(BUILD),release)
+CFLAGS += -Wall -Werror -O2
+nrf51822_xxac: OUTPUT_FILENAME := receiver
+else
+CFLAGS += -Wall -Werror -g3
+nrf51822_xxac: OUTPUT_FILENAME := receiver_debug
+endif
+
 # keep every function in separate section. This will allow linker to dump unused functions
 LDFLAGS += -Xlinker -Map=$(LISTING_DIRECTORY)/$(OUTPUT_FILENAME).map
 LDFLAGS += -mthumb -mabi=aapcs -L $(TEMPLATE_PATH) -T$(LINKER_SCRIPT)
@@ -140,7 +149,6 @@ vpath %.s $(ASM_PATHS)
 
 OBJECTS = $(C_OBJECTS) $(ASM_OBJECTS)
 
-nrf51822_xxac: OUTPUT_FILENAME := nrf51822_xxac
 nrf51822_xxac: LINKER_SCRIPT=uart_gcc_nrf51.ld
 
 nrf51822_xxac: $(BUILD_DIRECTORIES) $(OBJECTS)

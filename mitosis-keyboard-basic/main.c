@@ -1,14 +1,17 @@
-
-#define COMPILE_RIGHT
-//#define COMPILE_LEFT
+#if COMPILE_LEFT && COMPILE_RIGHT
+	#error "Can only compile either left or right half"
+#endif
+#if (!COMPILE_LEFT) && (!COMPILE_RIGHT)
+	#error "Please specify whether to compile left or right half"
+#endif
 
 #include "mitosis.h"
-#include "nrf_drv_config.h"
-#include "nrf_gzll.h"
-#include "nrf_gpio.h"
 #include "nrf_delay.h"
 #include "nrf_drv_clock.h"
+#include "nrf_drv_config.h"
 #include "nrf_drv_rtc.h"
+#include "nrf_gpio.h"
+#include "nrf_gzll.h"
 
 
 /*****************************************************************************/

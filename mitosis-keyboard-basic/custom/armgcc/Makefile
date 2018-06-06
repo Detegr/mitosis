@@ -84,14 +84,35 @@ CFLAGS += -DBOARD_CUSTOM
 CFLAGS += -DBSP_DEFINES_ONLY
 CFLAGS += -mcpu=cortex-m0
 CFLAGS += -mthumb -mabi=aapcs --std=gnu99
-# CFLAGS += -Wall -Werror -O3 -g3
- CFLAGS += -Wall -Werror -g3
 CFLAGS += -Wno-unused-function
 CFLAGS += -Wno-unused-variable
 CFLAGS += -mfloat-abi=soft
 # keep every function in separate section. This will allow linker to dump unused functions
 CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
 CFLAGS += -fno-builtin --short-enums 
+
+ifeq ($(HALF),left)
+CFLAGS += -DCOMPILE_LEFT
+ifeq ($(BUILD),release)
+CFLAGS += -Wall -Werror -O2
+nrf51822_xxac: OUTPUT_FILENAME := left
+else
+CFLAGS += -Wall -Werror -g3
+nrf51822_xxac: OUTPUT_FILENAME := left_debug
+endif
+else ifeq ($(HALF),right)
+CFLAGS += -DCOMPILE_RIGHT
+ifeq ($(BUILD),release)
+CFLAGS += -Wall -Werror -O2
+nrf51822_xxac: OUTPUT_FILENAME := right
+else
+CFLAGS += -Wall -Werror -g3
+nrf51822_xxac: OUTPUT_FILENAME := right_debug
+endif
+else
+$(error "Please specify either left or right half")
+endif
+
 # keep every function in separate section. This will allow linker to dump unused functions
 LDFLAGS += -Xlinker -Map=$(LISTING_DIRECTORY)/$(OUTPUT_FILENAME).map
 LDFLAGS += -mthumb -mabi=aapcs -L $(TEMPLATE_PATH) -T$(LINKER_SCRIPT)
@@ -136,7 +157,6 @@ vpath %.s $(ASM_PATHS)
 
 OBJECTS = $(C_OBJECTS) $(ASM_OBJECTS)
 
-nrf51822_xxac: OUTPUT_FILENAME := nrf51822_xxac
 nrf51822_xxac: LINKER_SCRIPT=gzll_gcc_nrf51.ld
 
 nrf51822_xxac: $(BUILD_DIRECTORIES) $(OBJECTS)
