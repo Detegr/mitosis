@@ -1,0 +1,5 @@
+.gdbinit
+*.hex
+*.bak
+mitosis-keyboard-basic/custom/armgcc/_build
+mitosis-receiver-basic/custom/armgcc/_build
