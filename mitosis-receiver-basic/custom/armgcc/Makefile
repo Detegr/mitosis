@@ -1,11 +1,15 @@
 PROJECT_NAME := mitosis-receiver-basic
 
 export OUTPUT_FILENAME
-#MAKEFILE_NAME := $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
 MAKEFILE_NAME := $(MAKEFILE_LIST)
 MAKEFILE_DIR := $(dir $(MAKEFILE_NAME) ) 
 
-TEMPLATE_PATH = ../../../../components/toolchain/gcc
+ifndef NRF_SDK_PATH
+$(error "Please set NRF_SDK_PATH")
+endif
+
+TEMPLATE_PATH = $(NRF_SDK_PATH)/components/toolchain/gcc
+
 ifeq ($(OS),Windows_NT)
 include $(TEMPLATE_PATH)/Makefile.windows
 else
@@ -37,43 +41,43 @@ remduplicates = $(strip $(if $1,$(firstword $1) $(call remduplicates,$(filter-ou
 
 #source common to all targets
 C_SOURCE_FILES += \
-$(abspath ../../../../components/toolchain/system_nrf51.c) \
-$(abspath ../../main.c) \
-$(abspath ../../../../components/libraries/util/app_error.c) \
-$(abspath ../../../../components/libraries/util/app_error_weak.c) \
-$(abspath ../../../../components/libraries/fifo/app_fifo.c) \
-$(abspath ../../../../components/libraries/util/app_util_platform.c) \
-$(abspath ../../../../components/libraries/util/nrf_assert.c) \
-$(abspath ../../../../components/libraries/uart/retarget.c) \
-$(abspath ../../../../components/libraries/uart/app_uart_fifo.c) \
-$(abspath ../../../../components/drivers_nrf/delay/nrf_delay.c) \
-$(abspath ../../../../components/drivers_nrf/common/nrf_drv_common.c) \
-$(abspath ../../../../components/drivers_nrf/uart/nrf_drv_uart.c) \
+$(abspath $(NRF_SDK_PATH)/components/toolchain/system_nrf51.c) \
+$(abspath $(CURDIR)/../../main.c) \
+$(abspath $(NRF_SDK_PATH)/components/libraries/util/app_error.c) \
+$(abspath $(NRF_SDK_PATH)/components/libraries/util/app_error_weak.c) \
+$(abspath $(NRF_SDK_PATH)/components/libraries/fifo/app_fifo.c) \
+$(abspath $(NRF_SDK_PATH)/components/libraries/util/app_util_platform.c) \
+$(abspath $(NRF_SDK_PATH)/components/libraries/util/nrf_assert.c) \
+$(abspath $(NRF_SDK_PATH)/components/libraries/uart/retarget.c) \
+$(abspath $(NRF_SDK_PATH)/components/libraries/uart/app_uart_fifo.c) \
+$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/delay/nrf_delay.c) \
+$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/common/nrf_drv_common.c) \
+$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/uart/nrf_drv_uart.c) \
 
 #assembly files common to all targets
-ASM_SOURCE_FILES  = $(abspath ../../../../components/toolchain/gcc/gcc_startup_nrf51.s)
+ASM_SOURCE_FILES  = $(abspath $(NRF_SDK_PATH)/components/toolchain/gcc/gcc_startup_nrf51.s)
 
 #assembly files common to all targets
-LIBS  = $(abspath ../../../../components/properitary_rf/gzll/gcc/gzll_gcc.a)
+LIBS  = $(abspath $(NRF_SDK_PATH)/components/properitary_rf/gzll/gcc/gzll_gcc.a)
 
 
 #includes common to all targets
-INC_PATHS += -I$(abspath ../../config)
-INC_PATHS += -I$(abspath ../../../../components/drivers_nrf/nrf_soc_nosd)
-INC_PATHS += -I$(abspath ../../../../components/device)
-INC_PATHS += -I$(abspath ../../../../components/libraries/uart)
-INC_PATHS += -I$(abspath ../../../../components/drivers_nrf/hal)
-INC_PATHS += -I$(abspath ../../../../components/drivers_nrf/delay)
-INC_PATHS += -I$(abspath ../../../../components/toolchain/CMSIS/Include)
-INC_PATHS += -I$(abspath ../..)
-INC_PATHS += -I$(abspath ../../../../components/libraries/util)
-INC_PATHS += -I$(abspath ../../../../components/drivers_nrf/uart)
-INC_PATHS += -I$(abspath ../../../../components/drivers_nrf/common)
-INC_PATHS += -I$(abspath ../../../../components/toolchain)
-INC_PATHS += -I$(abspath ../../../../components/drivers_nrf/config)
-INC_PATHS += -I$(abspath ../../../../components/libraries/fifo)
-INC_PATHS += -I$(abspath ../../../../components/toolchain/gcc)
-INC_PATHS += -I$(abspath ../../../../components/properitary_rf/gzll)
+INC_PATHS += -I$(abspath $(CURDIR)/../../config)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/nrf_soc_nosd)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/device)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/libraries/uart)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/hal)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/delay)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/toolchain/CMSIS/Include)
+INC_PATHS += -I$(abspath $(CURDIR)/../..)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/libraries/util)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/uart)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/common)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/toolchain)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/config)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/libraries/fifo)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/toolchain/gcc)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/properitary_rf/gzll)
 
 OBJECT_DIRECTORY = _build
 LISTING_DIRECTORY = $(OBJECT_DIRECTORY)
