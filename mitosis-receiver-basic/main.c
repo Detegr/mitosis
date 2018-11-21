@@ -1,19 +1,20 @@
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "app_uart.h"
-#include "nrf_drv_uart.h"
 #include "app_error.h"
-#include "nrf_delay.h"
+#include "app_uart.h"
 #include "nrf.h"
-#include "nrf_gzp.h"
+#include "nrf_delay.h"
+#include "nrf_drv_uart.h"
+#include "nrf_gpio.h"
 #include "nrf_gzll.h"
+#include "nrf_gzp.h"
 
 #define MAX_TEST_DATA_BYTES     (15U)                /**< max number of test bytes to be used for tx and rx. */
 #define UART_TX_BUF_SIZE 256                         /**< UART TX buffer size. */
 #define UART_RX_BUF_SIZE 1                           /**< UART RX buffer size. */
 
+#define NRF_GZLLDE_RXPERIOD_DIV_2 504
 
 #define RX_PIN_NUMBER  25
 #define TX_PIN_NUMBER  24
@@ -21,9 +22,7 @@
 #define RTS_PIN_NUMBER 22
 #define HWFC           false
 
-
-// Define payload length
-#define TX_PAYLOAD_LENGTH 4 ///< 4 byte payload length
+#define PAIRING_PIN 29
 
 // ticks for inactive keyboard
 #define INACTIVE 100000
@@ -44,21 +43,33 @@ static uint8_t data_buffer[10];
 
 // Debug helper variables
 extern nrf_gzll_error_code_t nrf_gzll_error_code;   ///< Error code
-static bool init_ok, enable_ok, push_ok, pop_ok, packet_received_left, packet_received_right;
+static bool init_ok, enable_ok, push_ok, pop_ok, packet_received_left, packet_received_right, uart_initialized;
 uint32_t left_active = 0;
 uint32_t right_active = 0;
 uint8_t c;
 
+static void gpio_config(void)
+{
+    nrf_gpio_cfg_sense_input(PAIRING_PIN, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
+}
+
+static bool read_pair_button(void)
+{
+    return (~NRF_GPIO->IN & (1<<PAIRING_PIN)) != 0x0;
+}
 
 void uart_error_handle(app_uart_evt_t * p_event)
 {
-    if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
+    if (uart_initialized)
     {
-        APP_ERROR_HANDLER(p_event->data.error_communication);
-    }
-    else if (p_event->evt_type == APP_UART_FIFO_ERROR)
-    {
-        APP_ERROR_HANDLER(p_event->data.error_code);
+        if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
+        {
+            APP_ERROR_HANDLER(p_event->data.error_communication);
+        }
+        else if (p_event->evt_type == APP_UART_FIFO_ERROR)
+        {
+            APP_ERROR_HANDLER(p_event->data.error_code);
+        }
     }
 }
 
@@ -86,8 +97,13 @@ int main(void)
 
     APP_ERROR_CHECK(err_code);
 
+    uart_initialized = true;
+
+    gpio_config();
+
     // Initialize Gazell
     nrf_gzll_init(NRF_GZLL_MODE_HOST);
+    nrf_gzll_set_timeslot_period(NRF_GZLLDE_RXPERIOD_DIV_2);
 
     // Initialize Gazell Pairing library
     gzp_init();
@@ -101,7 +117,9 @@ int main(void)
     {
         gzp_host_execute();
 
-        if (gzp_id_req_received())
+        bool pair_button_pressed = read_pair_button();
+
+        if (pair_button_pressed && gzp_id_req_received())
         {
             // Accept all pairing requests received.
             // The pairing library's proximity detection will (help) prevent
@@ -113,33 +131,37 @@ int main(void)
         {
             if (gzp_crypt_user_data_read(data_payload, (uint8_t*) &length))
             {
-                // unpacking received packet
-                if (data_payload[0]) // left-hand
+                // To unpack the packet, set the correct bits to 1 according
+                // to the LAYOUT-definition in QMK's keyboard/chimera_ergo/chimera_ergo.h
+                if (data_payload[0] & 0x1) // left-hand
                 {
-                    data_buffer[0] = ((data_payload[1] & 1<<3) ? 1:0) << 0 |
-                                     ((data_payload[1] & 1<<4) ? 1:0) << 1 |
-                                     ((data_payload[1] & 1<<5) ? 1:0) << 2 |
+                    data_buffer[0] = ((data_payload[1] & 1<<5) ? 1:0) << 2 |
                                      ((data_payload[1] & 1<<6) ? 1:0) << 3 |
-                                     ((data_payload[1] & 1<<7) ? 1:0) << 4;
+                                     ((data_payload[1] & 1<<7) ? 1:0) << 4 |
+                                     ((data_payload[3] & 1<<0) ? 1:0) << 5;
 
                     data_buffer[2] = ((data_payload[2] & 1<<6) ? 1:0) << 0 |
-                                     ((data_payload[2] & 1<<7) ? 1:0) << 1 |
                                      ((data_payload[1] & 1<<0) ? 1:0) << 2 |
                                      ((data_payload[1] & 1<<1) ? 1:0) << 3 |
-                                     ((data_payload[1] & 1<<2) ? 1:0) << 4;
+                                     ((data_payload[1] & 1<<2) ? 1:0) << 4 |
+                                     ((data_payload[1] & 1<<3) ? 1:0) << 5;
 
                     data_buffer[4] = ((data_payload[2] & 1<<1) ? 1:0) << 0 |
                                      ((data_payload[2] & 1<<2) ? 1:0) << 1 |
                                      ((data_payload[2] & 1<<3) ? 1:0) << 2 |
                                      ((data_payload[2] & 1<<4) ? 1:0) << 3 |
-                                     ((data_payload[2] & 1<<5) ? 1:0) << 4;
+                                     ((data_payload[2] & 1<<5) ? 1:0) << 4 |
+                                     ((data_payload[0] & 1<<2) ? 1:0) << 5;
 
-                    data_buffer[6] = ((data_payload[3] & 1<<5) ? 1:0) << 1 |
+                    data_buffer[6] = ((data_payload[3] & 1<<1) ? 1:0) << 0 |
+                                     ((data_payload[3] & 1<<5) ? 1:0) << 1 |
                                      ((data_payload[3] & 1<<6) ? 1:0) << 2 |
                                      ((data_payload[3] & 1<<7) ? 1:0) << 3 |
-                                     ((data_payload[2] & 1<<0) ? 1:0) << 4;
+                                     ((data_payload[2] & 1<<0) ? 1:0) << 4 |
+                                     ((data_payload[0] & 1<<1) ? 1:0) << 5;
 
-                    data_buffer[8] = ((data_payload[3] & 1<<1) ? 1:0) << 1 |
+                    data_buffer[8] = ((data_payload[1] & 1<<4) ? 1:0) << 0 |
+                                     ((data_payload[3] & 1<<1) ? 1:0) << 1 |
                                      ((data_payload[3] & 1<<2) ? 1:0) << 2 |
                                      ((data_payload[3] & 1<<3) ? 1:0) << 3 |
                                      ((data_payload[3] & 1<<4) ? 1:0) << 4;
@@ -149,30 +171,33 @@ int main(void)
                     data_buffer[1] = ((data_payload[1] & 1<<7) ? 1:0) << 0 |
                                      ((data_payload[1] & 1<<6) ? 1:0) << 1 |
                                      ((data_payload[1] & 1<<5) ? 1:0) << 2 |
-                                     ((data_payload[1] & 1<<4) ? 1:0) << 3 |
-                                     ((data_payload[1] & 1<<3) ? 1:0) << 4;
+                                     ((data_payload[1] & 1<<4) ? 1:0) << 3;
 
                     data_buffer[3] = ((data_payload[1] & 1<<2) ? 1:0) << 0 |
                                      ((data_payload[1] & 1<<1) ? 1:0) << 1 |
                                      ((data_payload[1] & 1<<0) ? 1:0) << 2 |
                                      ((data_payload[2] & 1<<7) ? 1:0) << 3 |
-                                     ((data_payload[2] & 1<<6) ? 1:0) << 4;
+                                     ((data_payload[3] & 1<<0) ? 1:0) << 5;
 
                     data_buffer[5] = ((data_payload[2] & 1<<5) ? 1:0) << 0 |
                                      ((data_payload[2] & 1<<4) ? 1:0) << 1 |
                                      ((data_payload[2] & 1<<3) ? 1:0) << 2 |
                                      ((data_payload[2] & 1<<2) ? 1:0) << 3 |
-                                     ((data_payload[2] & 1<<1) ? 1:0) << 4;
+                                     ((data_payload[2] & 1<<1) ? 1:0) << 4 |
+                                     ((data_payload[0] & 1<<2) ? 1:0) << 5;
 
                     data_buffer[7] = ((data_payload[2] & 1<<0) ? 1:0) << 0 |
                                      ((data_payload[3] & 1<<7) ? 1:0) << 1 |
                                      ((data_payload[3] & 1<<6) ? 1:0) << 2 |
-                                     ((data_payload[3] & 1<<5) ? 1:0) << 3;
+                                     ((data_payload[3] & 1<<5) ? 1:0) << 3 |
+                                     ((data_payload[2] & 1<<6) ? 1:0) << 4 |
+                                     ((data_payload[1] & 1<<3) ? 1:0) << 5;
 
                     data_buffer[9] = ((data_payload[3] & 1<<4) ? 1:0) << 0 |
                                      ((data_payload[3] & 1<<3) ? 1:0) << 1 |
                                      ((data_payload[3] & 1<<2) ? 1:0) << 2 |
-                                     ((data_payload[3] & 1<<1) ? 1:0) << 3;
+                                     ((data_payload[3] & 1<<1) ? 1:0) << 3 |
+                                     ((data_payload[0] & 1<<1) ? 1:0) << 4;
                 }
             }
         }
