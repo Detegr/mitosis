@@ -105,7 +105,7 @@
   Host 11 bytes.
   Keep in sync with values in custom/armgcc/gzll_gcc_nrf51.ld
 */ 
-#define GZP_PARAMS_STORAGE_ADR 0x00001000
+#define GZP_PARAMS_STORAGE_ADR 0x00010000
 
 /** 
   Number of bytes available for parameter storage in Device.
