@@ -47,7 +47,7 @@
 /**
   Reduced TX power for use during close proximity pairing.
  */
-#define GZP_POWER NRF_GZLL_TX_POWER_N16_DBM  
+#define GZP_POWER NRF_GZLL_TX_POWER_N8_DBM
 
 /** 
   Definition of pairing request timeout. 
