@@ -153,10 +153,10 @@ int main(void)
                                      ((data_payload[2] & 1<<5) ? 1:0) << 4 |
                                      ((data_payload[0] & 1<<2) ? 1:0) << 5;
 
-                    data_buffer[6] = ((data_payload[3] & 1<<1) ? 1:0) << 0 |
+                    data_buffer[6] = ((data_payload[3] & 1<<7) ? 1:0) << 0 |
                                      ((data_payload[3] & 1<<5) ? 1:0) << 1 |
                                      ((data_payload[3] & 1<<6) ? 1:0) << 2 |
-                                     ((data_payload[3] & 1<<7) ? 1:0) << 3 |
+                                     ((data_payload[2] & 1<<7) ? 1:0) << 3 |
                                      ((data_payload[2] & 1<<0) ? 1:0) << 4 |
                                      ((data_payload[0] & 1<<1) ? 1:0) << 5;
 

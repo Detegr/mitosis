@@ -45,6 +45,7 @@ static uint8_t ack_payload[NRF_GZLL_CONST_MAX_PAYLOAD_LENGTH]; ///< Placeholder 
 // Key buffers
 static volatile uint32_t keys, keys_snapshot;
 static volatile uint32_t debounce_ticks, activity_ticks;
+static volatile bool system_address_ok = false;
 static volatile bool host_id_ok = false;
 static volatile bool debouncing = false;
 static volatile bool dyn_key_ready = false;
@@ -264,8 +265,14 @@ int main()
 
     nrf_gzll_set_sync_lifetime(0); // Asynchronous mode, more efficient for pairing.
 
-    // Clear previous pairing data
-    gzp_erase_pairing_data();
+    // Check for previous pairing data
+    const enum gzp_pairing_status pairing_status = gzp_get_pairing_status();
+    if(pairing_status == NO_HOST_ID) {
+        system_address_ok = true;
+    } else if(pairing_status == 0) {
+        system_address_ok = true;
+        host_id_ok = true;
+    }
 
     // Enable Gazell pairing library
     gzp_init();
