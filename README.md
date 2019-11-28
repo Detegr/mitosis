@@ -1,5 +1,6 @@
 # Changes in this fork
 
+* Merged transport encryption feature by @rossica
 * Keyboard layout modified to work with [Chimera Ergo](https://github.com/GlenPickle/Chimera/tree/master/ergo) keyboard
 * Simplified makefile for easier building of the project
 
