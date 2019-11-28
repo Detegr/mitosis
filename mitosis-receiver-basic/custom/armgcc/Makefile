@@ -2,7 +2,7 @@ PROJECT_NAME := mitosis-receiver-basic
 
 export OUTPUT_FILENAME
 MAKEFILE_NAME := $(MAKEFILE_LIST)
-MAKEFILE_DIR := $(dir $(MAKEFILE_NAME) ) 
+MAKEFILE_DIR := $(dir $(MAKEFILE_NAME) )
 
 ifndef NRF_SDK_PATH
 $(error "Please set NRF_SDK_PATH")
@@ -21,7 +21,7 @@ RM := rm -rf
 
 #echo suspend
 ifeq ("$(VERBOSE)","1")
-NO_ECHO := 
+NO_ECHO :=
 else
 NO_ECHO := @
 endif
@@ -42,7 +42,14 @@ remduplicates = $(strip $(if $1,$(firstword $1) $(call remduplicates,$(filter-ou
 #source common to all targets
 C_SOURCE_FILES += \
 $(abspath $(NRF_SDK_PATH)/components/toolchain/system_nrf51.c) \
+$(abspath $(NRF_SDK_PATH)/components/libraries/sha256/sha256.c) \
 $(abspath $(CURDIR)/../../main.c) \
+$(abspath $(CURDIR)/../../../mitosis-crypto/mitosis-hmac.c) \
+$(abspath $(CURDIR)/../../../mitosis-crypto/mitosis-hkdf.c) \
+$(abspath $(CURDIR)/../../../mitosis-crypto/mitosis-keys.c) \
+$(abspath $(CURDIR)/../../../mitosis-crypto/mitosis-aes-ecb.c) \
+$(abspath $(CURDIR)/../../../mitosis-crypto/mitosis-cmac.c) \
+$(abspath $(CURDIR)/../../../mitosis-crypto/mitosis-aes-ctr.c) \
 $(abspath $(NRF_SDK_PATH)/components/libraries/util/app_error.c) \
 $(abspath $(NRF_SDK_PATH)/components/libraries/util/app_error_weak.c) \
 $(abspath $(NRF_SDK_PATH)/components/libraries/fifo/app_fifo.c) \
@@ -67,9 +74,11 @@ INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/nrf_soc_nosd)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/device)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/libraries/uart)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/hal)
+INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/libraries/sha256)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/delay)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/toolchain/CMSIS/Include)
 INC_PATHS += -I$(abspath $(CURDIR)/../..)
+INC_PATHS += -I$(abspath $(CURDIR)/../../../mitosis-crypto)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/libraries/util)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/uart)
 INC_PATHS += -I$(abspath $(NRF_SDK_PATH)/components/drivers_nrf/common)
@@ -195,7 +204,7 @@ genbin:
 	$(NO_ECHO)$(OBJCOPY) -O binary $(OUTPUT_BINARY_DIRECTORY)/$(OUTPUT_FILENAME).out $(OUTPUT_BINARY_DIRECTORY)/$(OUTPUT_FILENAME).bin
 
 ## Create binary .hex file from the .out file
-genhex: 
+genhex:
 	@echo Preparing: $(OUTPUT_FILENAME).hex
 	$(NO_ECHO)$(OBJCOPY) -O ihex $(OUTPUT_BINARY_DIRECTORY)/$(OUTPUT_FILENAME).out $(OUTPUT_BINARY_DIRECTORY)/$(OUTPUT_FILENAME).hex
 echosize:
